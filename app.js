@@ -236,6 +236,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Keyboard ergonomics
+  document.addEventListener('keydown', (e) => {
+    // Press '/' to jump to search bar
+    if (e.key === '/' && document.activeElement !== repoInput && document.activeElement !== patInput) {
+      e.preventDefault();
+      repoInput.focus();
+      repoInput.select();
+    }
+    // Press 'Escape' to dismiss any modal
+    if (e.key === 'Escape') {
+      tokenModal.classList.add('hidden');
+      const shareModalEl = document.getElementById('share-modal');
+      if (shareModalEl) shareModalEl.classList.add('hidden');
+    }
+    // Press 'Space' to toggle 3D rotation (when not typing in an input)
+    if (e.code === 'Space' && document.activeElement !== repoInput && document.activeElement !== patInput) {
+      e.preventDefault();
+      const active = galaxy.toggleRotation();
+      toggleRotationBtn.classList.toggle('active', active);
+    }
+    // Press 'r' or 'R' to reset 3D camera
+    if ((e.key === 'r' || e.key === 'R') && document.activeElement !== repoInput && document.activeElement !== patInput) {
+      galaxy.resetCamera();
+    }
+  });
+
   // Load repository from URL param if present, otherwise default to user's GitPulse repo
   const urlParams = new URLSearchParams(window.location.search);
   const initialRepo = urlParams.get('repo') || 'Vivek-k001/GitPulse';
