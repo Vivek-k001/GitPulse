@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const galaxy = new GalaxyEngine('galaxy-container');
   const punchcard = new PunchcardChart('punchcard-container');
   const constellation = new ConstellationGraph('constellation-container');
+  const shareModal = new ShareModal();
+
+  let currentRepoFullName = 'facebook/react';
 
   const searchForm = document.getElementById('search-form');
   const repoInput = document.getElementById('repo-input');
@@ -24,6 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const patInput = document.getElementById('pat-input');
   const saveTokenBtn = document.getElementById('save-token-btn');
   const clearTokenBtn = document.getElementById('clear-token-btn');
+  const shareBtn = document.getElementById('share-btn');
+
+  shareBtn.addEventListener('click', () => {
+    const [owner, repo] = currentRepoFullName.split('/');
+    if (owner && repo) {
+      shareModal.open(owner, repo);
+    }
+  });
 
   // Preset chips
   document.querySelectorAll('.preset-chip').forEach(btn => {
@@ -84,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const [owner, repo] = parts;
+    currentRepoFullName = `${owner}/${repo}`;
     repoHeading.textContent = `${owner} / ${repo}`;
 
     try {
