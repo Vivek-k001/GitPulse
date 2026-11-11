@@ -20,6 +20,11 @@ class GalaxyEngine {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x010409);
 
+    // Subtle coordinate orientation grid on the equatorial plane
+    const gridHelper = new THREE.GridHelper(240, 24, 0x21262d, 0x161b22);
+    gridHelper.position.y = -40;
+    this.scene.add(gridHelper);
+
     this.camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
     this.camera.position.set(0, 0, 180);
 
