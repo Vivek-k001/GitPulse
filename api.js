@@ -34,8 +34,10 @@ const API = {
       const dot = document.querySelector('.rate-dot');
       if (el) el.textContent = `${remaining}/${limit} calls`;
       if (dot) {
-        const ratio = parseInt(remaining, 10) / parseInt(limit, 10);
-        dot.style.background = ratio > 0.2 ? '#3fb950' : ratio > 0.05 ? '#d29922' : '#f85149';
+        const remNum = parseInt(remaining, 10);
+        const limitNum = parseInt(limit, 10);
+        const ratio = remNum / limitNum;
+        dot.style.background = remNum === 0 ? '#f85149' : ratio > 0.2 ? '#3fb950' : '#d29922';
       }
     }
   },
@@ -48,12 +50,15 @@ const API = {
 
     if (!res.ok) {
       if (res.status === 403 || res.status === 429) {
-        throw new Error('Rate limit exceeded. Provide a personal access token to continue.');
+        // Automatically open the token modal directly instead of ugly browser alert()
+        const tokenModal = document.getElementById('token-modal');
+        if (tokenModal) tokenModal.classList.remove('hidden');
+        throw new Error('API rate limit reached (60/hr for unauthenticated IP). Paste a GitHub token to unlock 5,000/hr.');
       }
       if (res.status === 404) {
-        throw new Error('Repository not found. Please check owner/repo.');
+        throw new Error('Repository not found. Please verify the name or privacy settings.');
       }
-      throw new Error(`GitHub API error (${res.status})`);
+      throw new Error(`GitHub API request failed (${res.status})`);
     }
     return res.json();
   },
@@ -74,3 +79,4 @@ const API = {
     return this.request(`/repos/${owner}/${repo}/contributors?per_page=30`);
   }
 };
+

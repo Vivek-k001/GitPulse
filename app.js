@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
     } catch (err) {
-      alert(err.message || 'Error loading repository data.');
+      console.warn('Repository inspection error:', err.message);
     }
   }
 
