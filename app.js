@@ -36,17 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Preset chips
-  document.querySelectorAll('.preset-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const repo = btn.getAttribute('data-repo');
-      if (repo) {
-        repoInput.value = repo;
-        loadRepository(repo);
-      }
-    });
-  });
-
   // Galaxy Controls
   toggleRotationBtn.addEventListener('click', () => {
     const active = galaxy.toggleRotation();
@@ -180,6 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load default repository
-  loadRepository('facebook/react');
+  // Load repository from URL param if present, otherwise default to user's GitPulse repo
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialRepo = urlParams.get('repo') || 'Vivek-k001/GitPulse';
+  loadRepository(initialRepo);
 });
