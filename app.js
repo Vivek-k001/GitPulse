@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const metricForks = document.getElementById('metric-forks');
   const metricIssues = document.getElementById('metric-issues');
   const metricLicense = document.getElementById('metric-license');
+  const metricSize = document.getElementById('metric-size');
+  const metricBranch = document.getElementById('metric-branch');
+  const metricCreated = document.getElementById('metric-created');
+  const metricPushed = document.getElementById('metric-pushed');
 
   // Token Modal
   const tokenModal = document.getElementById('token-modal');
@@ -118,7 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
       metricStars.textContent = Number(repoData.stargazers_count).toLocaleString();
       metricForks.textContent = Number(repoData.forks_count).toLocaleString();
       metricIssues.textContent = Number(repoData.open_issues_count).toLocaleString();
-      metricLicense.textContent = repoData.license ? repoData.license.spdx_id || repoData.license.name : 'None';
+      metricLicense.textContent = repoData.license ? (repoData.license.spdx_id || repoData.license.name) : 'None';
+      metricSize.textContent = repoData.size > 1024 ? `${(repoData.size / 1024).toFixed(1)} MB` : `${repoData.size} KB`;
+      metricBranch.textContent = repoData.default_branch || 'main';
+      metricCreated.textContent = new Date(repoData.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+      
+      const pushedDate = new Date(repoData.pushed_at);
+      const diffDays = Math.floor((new Date() - pushedDate) / (1000 * 60 * 60 * 24));
+      metricPushed.textContent = diffDays === 0 ? 'Today' : `${diffDays}d ago`;
 
       // 2. Fetch Languages & Render Galaxy
       const languagesData = await API.getLanguages(owner, repo);
