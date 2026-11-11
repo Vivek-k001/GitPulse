@@ -9,6 +9,8 @@ class GalaxyEngine {
     this.points = null;
     this.isRotating = true;
     this.animationFrameId = null;
+    this.mode = 'sphere'; // 'sphere', 'spiral', 'ring'
+    this.languagesData = null;
 
     this.init();
   }
@@ -20,19 +22,17 @@ class GalaxyEngine {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x010409);
 
-    // Subtle coordinate orientation grid on the equatorial plane
-    const gridHelper = new THREE.GridHelper(240, 24, 0x21262d, 0x161b22);
-    gridHelper.position.y = -40;
+    const gridHelper = new THREE.GridHelper(260, 26, 0x21262d, 0x161b22);
+    gridHelper.position.y = -50;
     this.scene.add(gridHelper);
 
     this.camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    this.camera.position.set(0, 0, 180);
+    this.camera.position.set(0, 40, 200);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Clear existing children
     this.container.innerHTML = '';
     this.container.appendChild(this.renderer.domElement);
 
@@ -42,14 +42,22 @@ class GalaxyEngine {
       this.controls.dampingFactor = 0.05;
       this.controls.rotateSpeed = 0.8;
       this.controls.minDistance = 60;
-      this.controls.maxDistance = 400;
+      this.controls.maxDistance = 500;
     }
 
     window.addEventListener('resize', () => this.onResize());
     this.animate();
   }
 
+  setMode(mode) {
+    this.mode = mode;
+    if (this.languagesData) {
+      this.buildGalaxy(this.languagesData);
+    }
+  }
+
   buildGalaxy(languagesData) {
+    this.languagesData = languagesData;
     if (this.points) {
       this.scene.remove(this.points);
       this.points.geometry.dispose();
@@ -60,7 +68,7 @@ class GalaxyEngine {
     const totalBytes = Object.values(languagesData).reduce((a, b) => a + b, 0);
     if (totalBytes === 0) return;
 
-    const totalParticles = 6000;
+    const totalParticles = 7500;
     const positions = new Float32Array(totalParticles * 3);
     const colors = new Float32Array(totalParticles * 3);
 
@@ -69,21 +77,42 @@ class GalaxyEngine {
 
     entries.forEach(([lang, bytes], index) => {
       const share = bytes / totalBytes;
-      const count = Math.max(Math.floor(share * totalParticles), 50);
+      const count = Math.max(Math.floor(share * totalParticles), 80);
       const hexColor = getLanguageColor(lang);
       const color = new THREE.Color(hexColor);
 
-      const baseRadius = 30 + (index * 12);
-      const ringThickness = 12;
-
       for (let i = 0; i < count && offset < totalParticles; i++) {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = (Math.random() - 0.5) * Math.PI * 0.6;
-        const radius = baseRadius + (Math.random() - 0.5) * ringThickness;
+        let x = 0, y = 0, z = 0;
 
-        const x = radius * Math.cos(theta) * Math.cos(phi);
-        const y = radius * Math.sin(phi) * 0.6 + (Math.random() - 0.5) * 6;
-        const z = radius * Math.sin(theta) * Math.cos(phi);
+        if (this.mode === 'spiral') {
+          // Archimedean Spiral arms
+          const armAngle = (index / Math.max(entries.length, 1)) * Math.PI * 2;
+          const distance = Math.pow(Math.random(), 0.5) * 85 + 10;
+          const theta = armAngle + distance * 0.08 + (Math.random() - 0.5) * 0.4;
+          x = distance * Math.cos(theta);
+          z = distance * Math.sin(theta);
+          y = (Math.random() - 0.5) * (14 - distance * 0.1);
+        } else if (this.mode === 'ring') {
+          // Torus ring structure
+          const u = Math.random() * Math.PI * 2;
+          const v = Math.random() * Math.PI * 2;
+          const majorRadius = 55 + (index * 6);
+          const minorRadius = 10;
+          x = (majorRadius + minorRadius * Math.cos(v)) * Math.cos(u);
+          z = (majorRadius + minorRadius * Math.cos(v)) * Math.sin(u);
+          y = minorRadius * Math.sin(v) * 0.7;
+        } else {
+          // Spherical core & planetary belts
+          const baseRadius = 28 + (index * 14);
+          const ringThickness = 14;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = (Math.random() - 0.5) * Math.PI * 0.65;
+          const radius = baseRadius + (Math.random() - 0.5) * ringThickness;
+
+          x = radius * Math.cos(theta) * Math.cos(phi);
+          y = radius * Math.sin(phi) * 0.6 + (Math.random() - 0.5) * 6;
+          z = radius * Math.sin(theta) * Math.cos(phi);
+        }
 
         positions[offset * 3] = x;
         positions[offset * 3 + 1] = y;
@@ -105,7 +134,7 @@ class GalaxyEngine {
       size: 2.2,
       vertexColors: true,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.88
     });
 
     this.points = new THREE.Points(geometry, material);
@@ -119,7 +148,7 @@ class GalaxyEngine {
 
   resetCamera() {
     if (this.camera && this.controls) {
-      this.camera.position.set(0, 0, 180);
+      this.camera.position.set(0, 40, 200);
       this.controls.target.set(0, 0, 0);
       this.controls.update();
     }
@@ -138,7 +167,7 @@ class GalaxyEngine {
     this.animationFrameId = requestAnimationFrame(() => this.animate());
 
     if (this.points && this.isRotating) {
-      this.points.rotation.y += 0.002;
+      this.points.rotation.y += 0.0018;
     }
 
     if (this.controls) {

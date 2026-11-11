@@ -14,6 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleRotationBtn = document.getElementById('toggle-rotation-btn');
   const resetCamBtn = document.getElementById('reset-cam-btn');
 
+  // Mode buttons
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.getAttribute('data-mode');
+      galaxy.setMode(mode);
+    });
+  });
+
   // Metrics elements
   const metricStars = document.getElementById('metric-stars');
   const metricForks = document.getElementById('metric-forks');
