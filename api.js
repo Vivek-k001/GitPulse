@@ -77,6 +77,10 @@ const API = {
 
   async getContributors(owner, repo) {
     return this.request(`/repos/${owner}/${repo}/contributors?per_page=30`);
+  },
+
+  async getRecentCommits(owner, repo) {
+    return this.request(`/repos/${owner}/${repo}/commits?per_page=10`);
   }
 };
 

@@ -152,6 +152,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Contributors error:', err);
       }
 
+      // 5. Fetch Recent Commits
+      try {
+        const commits = await API.getRecentCommits(owner, repo);
+        renderRecentCommits(commits);
+      } catch (err) {
+        console.warn('Commits error:', err);
+      }
+
     } catch (err) {
       console.warn('Repository inspection error:', err.message);
     }
@@ -187,6 +195,44 @@ document.addEventListener('DOMContentLoaded', () => {
       chip.appendChild(dot);
       chip.appendChild(document.createTextNode(`${lang} ${pct}%`));
       languageLegend.appendChild(chip);
+    });
+  }
+
+  function renderRecentCommits(commits) {
+    const container = document.getElementById('commits-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!Array.isArray(commits) || commits.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>No recent commits found.</p></div>';
+      return;
+    }
+
+    commits.forEach(c => {
+      const item = document.createElement('a');
+      item.className = 'commit-item';
+      item.href = c.html_url;
+      item.target = '_blank';
+      item.rel = 'noopener noreferrer';
+
+      const avatarUrl = c.author ? c.author.avatar_url : 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png';
+      const shortSha = c.sha.substring(0, 7);
+      const msg = c.commit.message.split('\n')[0];
+      const date = new Date(c.commit.author.date);
+      const diffHours = Math.round((new Date() - date) / (1000 * 60 * 60));
+      const timeStr = diffHours < 24 ? `${diffHours}h ago` : `${Math.round(diffHours / 24)}d ago`;
+
+      item.innerHTML = `
+        <div class="commit-left">
+          <img class="commit-avatar" src="${avatarUrl}" alt="author avatar" />
+          <span class="commit-msg">${msg}</span>
+        </div>
+        <div class="commit-meta">
+          <span class="commit-sha">${shortSha}</span>
+          <span class="commit-time">${timeStr}</span>
+        </div>
+      `;
+      container.appendChild(item);
     });
   }
 
