@@ -87,15 +87,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function parseRepoInput(raw) {
+    if (!raw) return null;
+    let cleaned = raw.trim();
+    // Remove protocol and domain if full URL is pasted
+    cleaned = cleaned.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
+    // Remove trailing .git and slashes
+    cleaned = cleaned.replace(/\.git$/i, '').replace(/^\/+|\/+$/g, '');
+    const parts = cleaned.split('/').map(p => p.trim());
+    if (parts.length >= 2 && parts[0] && parts[1]) {
+      return { owner: parts[0], repo: parts[1] };
+    }
+    return null;
+  }
+
   async function loadRepository(repoFullName) {
-    const parts = repoFullName.split('/').map(p => p.trim());
-    if (parts.length !== 2 || !parts[0] || !parts[1]) {
-      alert('Please enter a valid repository format: owner/repository');
+    const parsed = parseRepoInput(repoFullName);
+    if (!parsed) {
+      alert('Please enter a valid repository format, e.g. "owner/repo" or "https://github.com/owner/repo"');
       return;
     }
 
-    const [owner, repo] = parts;
+    const { owner, repo } = parsed;
     currentRepoFullName = `${owner}/${repo}`;
+    repoInput.value = currentRepoFullName;
     repoHeading.textContent = `${owner} / ${repo}`;
 
     try {
