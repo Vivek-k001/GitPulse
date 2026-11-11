@@ -97,9 +97,12 @@ body {
   transition: border-color 0.15s ease;
 }
 
-.search-form input:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 1px var(--accent-blue);
+.search-form input::placeholder {
+  color: #6e7681;
+}
+
+.modal-body input::placeholder {
+  color: #6e7681;
 }
 
 .search-form button,
@@ -463,3 +466,4 @@ body {
   gap: 8px;
   margin-top: 6px;
 }
+
