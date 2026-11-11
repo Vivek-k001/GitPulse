@@ -11,10 +11,12 @@ GitPulse renders GitHub repository structures into an interactive 3D WebGL parti
 
 ## 🌟 Key Features
 
-- **🪐 3D Codebase Galaxy**: Interactive WebGL particle system driven by Three.js. Languages are mapped with exact GitHub palette signatures and byte-weighted density rings.
-- **🕒 24×7 Activity Punchcard**: 7-day by 24-hour hourly commit bubble grid analyzing developer productivity cadence.
+- **📁 Sparse Subdirectory Downloader**: Export and download any individual folder or component from a massive repository as a `.zip` directly inside your browser—without needing `git clone`.
+- **🪐 3D Codebase Galaxy**: Interactive WebGL particle system driven by Three.js with multiple projection geometries (Sphere, Archimedean Spiral, and Torus Ring).
+- **🕒 24×7 Activity Punchcard with Hover Tooltips**: 7-day by 24-hour commit bubble matrix with real-time hover stats revealing peak contributor hours.
 - **👥 Contributor Constellation**: D3 force-directed physics network linking contributor avatars by pull volume.
-- **⚡ Rate-Limit Resilient**: Real-time rate tracking with optional browser-only Personal Access Token storage.
+- **⚡ Rate-Limit Resilient**: Real-time rate tracking with live reset countdown and optional browser-only Personal Access Token storage.
+- **📜 Commit Stream**: Real-time recent commit feed with verified SHAs and author avatars.
 - **🏷️ 1-Click Embeds**: Generate live Markdown badges for repository README files.
 
 ---
