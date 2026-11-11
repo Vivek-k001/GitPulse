@@ -38,14 +38,14 @@ body {
 
 /* Header */
 .app-header {
-  height: 56px;
+  height: 64px;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  gap: 16px;
+  padding: 0 24px;
+  gap: 20px;
 }
 
 .brand {
@@ -131,24 +131,42 @@ body {
   flex-shrink: 0;
 }
 
+/* GitHub Header Status Item */
 .rate-indicator {
   display: flex;
   align-items: center;
+  gap: 8px;
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+.rate-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-family: var(--font-mono);
-  color: var(--text-secondary);
-  background: var(--bg-overlay);
-  padding: 4px 10px;
-  border-radius: 14px;
+  background: var(--bg-inset);
   border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
 }
 
 .rate-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #3fb950;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.rate-countdown {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font-sans);
 }
 
 .secondary-btn {
@@ -244,6 +262,55 @@ body {
 .panel-controls {
   display: flex;
   gap: 6px;
+}
+
+/* App Header Navigation Tabs */
+.app-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-inset);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-btn.active {
+  color: #ffffff;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-default);
+}
+
+.tab-btn .tab-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: rgba(47, 129, 247, 0.2);
+  color: #58a6ff;
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(47, 129, 247, 0.3);
 }
 
 .view-mode-toggle {
@@ -448,8 +515,97 @@ body {
   z-index: 1000;
 }
 
-.modal-overlay.hidden {
-  display: none;
+.hidden {
+  display: none !important;
+}
+
+/* Downloader view */
+.downloader-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: var(--bg-inset);
+}
+
+.downloader-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.crumb-item {
+  color: var(--accent-blue);
+  cursor: pointer;
+}
+
+.crumb-item:hover {
+  text-decoration: underline;
+}
+
+.crumb-item.active {
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: default;
+  text-decoration: none;
+}
+
+.crumb-sep {
+  color: var(--text-secondary);
+}
+
+.tree-list-container {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 480px;
+}
+
+.tree-file-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  transition: background-color 0.1s ease;
+}
+
+.tree-row.is-folder {
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.tree-row.is-folder:hover {
+  background: var(--bg-overlay);
+  color: var(--accent-blue);
+}
+
+.tree-row.is-file {
+  color: var(--text-secondary);
+}
+
+.tree-icon {
+  font-size: 14px;
+}
+
+.downloader-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
 }
 
 .modal-content {

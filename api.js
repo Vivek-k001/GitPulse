@@ -26,9 +26,19 @@ const API = {
     return headers;
   },
 
+  resetTimestamp: null,
+  timerInterval: null,
+
   updateRateLimit(headers) {
     const remaining = headers.get('x-ratelimit-remaining');
     const limit = headers.get('x-ratelimit-limit');
+    const reset = headers.get('x-ratelimit-reset');
+
+    if (reset !== null) {
+      this.resetTimestamp = parseInt(reset, 10);
+      this.startCountdown();
+    }
+
     if (remaining !== null && limit !== null) {
       const el = document.getElementById('rate-text');
       const dot = document.querySelector('.rate-dot');
@@ -40,6 +50,35 @@ const API = {
         dot.style.background = remNum === 0 ? '#f85149' : ratio > 0.2 ? '#3fb950' : '#d29922';
       }
     }
+  },
+
+  startCountdown() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+
+    const updateTimerUI = () => {
+      const countdownEl = document.getElementById('rate-countdown');
+      const modalCountdownEl = document.getElementById('modal-countdown-text');
+      if (!this.resetTimestamp) return;
+
+      const nowSec = Math.floor(Date.now() / 1000);
+      const diffSec = this.resetTimestamp - nowSec;
+
+      if (diffSec <= 0) {
+        if (countdownEl) countdownEl.textContent = '';
+        if (modalCountdownEl) modalCountdownEl.textContent = 'Free quota reset! You can make requests now.';
+        clearInterval(this.timerInterval);
+        return;
+      }
+
+      const m = Math.floor(diffSec / 60);
+      const s = diffSec % 60;
+      const timeStr = m > 0 ? `${m}m ${s}s` : `${s}s`;
+      if (countdownEl) countdownEl.textContent = `free access resets in ${timeStr}`;
+      if (modalCountdownEl) modalCountdownEl.textContent = `Free access automatically resets in ${timeStr}.`;
+    };
+
+    updateTimerUI();
+    this.timerInterval = setInterval(updateTimerUI, 1000);
   },
 
   async request(endpoint) {
@@ -81,6 +120,33 @@ const API = {
 
   async getRecentCommits(owner, repo) {
     return this.request(`/repos/${owner}/${repo}/commits?per_page=10`);
+  },
+
+  async getTree(owner, repo, branch = 'main') {
+    return this.request(`/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
+  },
+
+  async getRawFile(owner, repo, branch, path) {
+    const token = this.getToken();
+    const headers = {
+      'Accept': 'application/vnd.github.v3.raw',
+      'User-Agent': 'GitPulse-Dashboard'
+    };
+    if (token) {
+      headers['Authorization'] = `token ${token}`;
+    }
+    const res = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`, {
+      headers
+    });
+    if (!res.ok) {
+      // Fallback to API blob if raw blocked
+      const blobRes = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`, {
+        headers: this.getHeaders()
+      });
+      const data = await blobRes.json();
+      return atob(data.content.replace(/\s/g, ''));
+    }
+    return res.text();
   }
 };
 

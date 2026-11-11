@@ -4,8 +4,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const punchcard = new PunchcardChart('punchcard-container');
   const constellation = new ConstellationGraph('constellation-container');
   const shareModal = new ShareModal();
+  const downloader = new SubdirectoryDownloader();
 
   let currentRepoFullName = 'facebook/react';
+  let currentRepoData = null;
+
+  // App View Toggle (Inspector vs Downloader)
+  const inspectorView = document.getElementById('inspector-view');
+  const downloaderView = document.getElementById('downloader-view');
+
+  document.querySelectorAll('[data-app-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-app-view]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const view = btn.getAttribute('data-app-view');
+
+      if (view === 'downloader') {
+        inspectorView.classList.add('hidden');
+        downloaderView.classList.remove('hidden');
+        const [owner, repo] = currentRepoFullName.split('/');
+        downloader.loadRepoTree(owner, repo, currentRepoData ? currentRepoData.default_branch : 'main');
+      } else {
+        downloaderView.classList.add('hidden');
+        inspectorView.classList.remove('hidden');
+        galaxy.onResize();
+      }
+    });
+  });
 
   const searchForm = document.getElementById('search-form');
   const repoInput = document.getElementById('repo-input');
@@ -113,12 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const { owner, repo } = parsed;
     currentRepoFullName = `${owner}/${repo}`;
-    repoInput.value = currentRepoFullName;
     repoHeading.textContent = `${owner} / ${repo}`;
 
     try {
       // 1. Fetch Repository Overview
       const repoData = await API.getRepo(owner, repo);
+      currentRepoData = repoData;
       metricStars.textContent = Number(repoData.stargazers_count).toLocaleString();
       metricForks.textContent = Number(repoData.forks_count).toLocaleString();
       metricIssues.textContent = Number(repoData.open_issues_count).toLocaleString();
@@ -261,6 +286,9 @@ document.addEventListener('DOMContentLoaded', () => {
       galaxy.resetCamera();
     }
   });
+
+  // Clear search input on initial load so placeholder/hinttext is clearly visible
+  repoInput.value = '';
 
   // Load repository from URL param if present, otherwise default to user's GitPulse repo
   const urlParams = new URLSearchParams(window.location.search);

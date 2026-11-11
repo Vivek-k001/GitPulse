@@ -5,11 +5,76 @@ class PunchcardChart {
     this.canvas = null;
     this.ctx = null;
     this.days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    this.punchData = [];
+    this.points = [];
+    this.tooltip = null;
+    this.initTooltip();
+  }
+
+  initTooltip() {
+    this.tooltip = document.createElement('div');
+    this.tooltip.className = 'punchcard-tooltip';
+    this.tooltip.style.position = 'absolute';
+    this.tooltip.style.display = 'none';
+    this.tooltip.style.pointerEvents = 'none';
+    this.tooltip.style.background = '#161b22';
+    this.tooltip.style.border = '1px solid #30363d';
+    this.tooltip.style.borderRadius = '6px';
+    this.tooltip.style.padding = '5px 10px';
+    this.tooltip.style.fontSize = '12px';
+    this.tooltip.style.fontFamily = 'var(--font-mono, monospace)';
+    this.tooltip.style.color = '#f0f6fc';
+    this.tooltip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+    this.tooltip.style.zIndex = '50';
+    this.tooltip.style.transform = 'translate(-50%, -120%)';
+    this.container.style.position = 'relative';
+    this.container.appendChild(this.tooltip);
+
+    this.container.addEventListener('mousemove', (e) => this.onMouseMove(e));
+    this.container.addEventListener('mouseleave', () => this.hideTooltip());
+  }
+
+  onMouseMove(e) {
+    if (!this.points.length) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    let closest = null;
+    let minDistance = Infinity;
+
+    for (const pt of this.points) {
+      const dist = Math.hypot(pt.x - mouseX, pt.y - mouseY);
+      if (dist <= Math.max(pt.radius + 6, 8) && dist < minDistance) {
+        minDistance = dist;
+        closest = pt;
+      }
+    }
+
+    if (closest) {
+      const hourStr = closest.hour === 0 ? '12 AM' : closest.hour === 12 ? '12 PM' : closest.hour < 12 ? `${closest.hour} AM` : `${closest.hour - 12} PM`;
+      const commitLabel = closest.commits === 1 ? '1 commit' : `${closest.commits.toLocaleString()} commits`;
+      this.tooltip.innerHTML = `<strong>${closest.dayName} at ${hourStr}</strong><br><span style="color:#39d353; font-weight:600;">+${commitLabel}</span>`;
+      this.tooltip.style.left = `${closest.x}px`;
+      this.tooltip.style.top = `${closest.y}px`;
+      this.tooltip.style.display = 'block';
+    } else {
+      this.hideTooltip();
+    }
+  }
+
+  hideTooltip() {
+    if (this.tooltip) {
+      this.tooltip.style.display = 'none';
+    }
   }
 
   render(punchData) {
     if (!this.container) return;
+    this.punchData = punchData;
+    this.points = [];
     this.container.innerHTML = '';
+    this.initTooltip();
 
     const width = this.container.clientWidth || 360;
     const height = this.container.clientHeight || 200;
@@ -62,6 +127,7 @@ class PunchcardChart {
     }
 
     // Draw Activity Circles
+    // Draw Activity Circles and cache positions for hover tooltips
     punchData.forEach(([day, hour, commits]) => {
       if (commits === 0) return;
 
@@ -71,6 +137,16 @@ class PunchcardChart {
       const ratio = commits / maxCommits;
       const maxRadius = Math.min(cellWidth, cellHeight) / 2 - 1.5;
       const radius = Math.max(2, ratio * maxRadius);
+
+      this.points.push({
+        x,
+        y,
+        radius,
+        commits,
+        day,
+        dayName: this.days[day],
+        hour
+      });
 
       // GitHub green gradient scale
       this.ctx.beginPath();
@@ -90,3 +166,4 @@ class PunchcardChart {
     });
   }
 }
+
